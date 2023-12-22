@@ -1,0 +1,105 @@
+#!/bin/bash
+#
+# Node Peer Reporter (/usr/sbin/npr)
+# (c)2023 Simon Kapadia
+#
+# See LICENSE file for details of MIT license
+
+# Load in the config file
+eval $(sed -r '/[^=]+=[^=]+/!d;s/\s+=\s/=/g' "/etc/npr.conf")
+PORTS=`cat /proc/net/ax25 | awk {'print $2'} | sort -n | uniq`
+SWVER=`uname -r`
+
+# Function to generate the payload
+# (Should probably write this using a proper json parser but this was quick)
+payload() {
+echo "{"
+cat << EOF1
+  "nodeAlias": "$NODENAME",
+  "location": {
+    "locator": "$LOCATOR",
+    "randomised": true,
+    "asl": $ASL
+  },
+  "software": {
+    "name": "Linux",
+    "version": "$SWVER"
+  },
+  "ports": [
+EOF1
+for PORT in `cat /proc/net/ax25 | awk {'print $2'} | sort -n | uniq` ;
+  do
+    INTNAME=`ifconfig $PORT | grep ax25 | awk {'print $2'}`
+    PORTNAME=`grep $INTNAME /etc/ax25/axports | awk {'print $1'}`
+    FREQ="FREQ_$PORTNAME"
+    MODE="MODE_$PORTNAME"
+    BAUD="BAUD_$PORTNAME"
+    TYPE="TYPE_$PORTNAME"
+    MOD="MOD_$PORTNAME"
+cat << EOF2
+    {
+      "id": "$PORTNAME",
+      "freq": ${!FREQ},
+      "mode": "${!MODE}",
+      "baud": ${!BAUD},
+      "linkType": "${!TYPE}",
+      "modulation": "${!MOD}"
+    }, 
+EOF2
+  done
+cat << EOF3
+  null
+  ],
+  "neighbours": [
+EOF3
+for PORT in `cat /proc/net/ax25 | awk {'print $2'} | sort -n | uniq` ;
+  do
+    INTNAME=`ifconfig $PORT | grep ax25 | awk {'print $2'}`
+    PORTNAME=`grep $INTNAME /etc/ax25/axports | awk {'print $1'}`
+    PORTNODES=`grep $PORT /proc/net/nr_neigh | awk {'print $2'}`
+    for PORTNODE in $PORTNODES ;
+      do
+cat << EOF4
+    {
+      "node": "$PORTNODE",
+      "port": "$PORTNAME"
+    },
+EOF4
+      done
+  done
+cat << EOF5
+  null
+  ],
+  "source": "ReportedByNode"
+}
+EOF5
+}
+
+# Check for debug parameter
+CURLOPTS=""
+DEBUG="false"
+if [ $1 ]  && [ $1 == '-d' ] ; then
+  echo Debug Mode Enabled
+  CURLOPTS+="-v -v"
+  DEBUG="true"
+fi
+
+# Check state file
+diff -q /tmp/npr.state /proc/net/nr_neigh > /dev/null
+DIFF=$?
+if [ $DIFF -ne 0 ] ; then
+  # State file is different or does not exist
+  echo Peer node changes detected, uploading to nodes.ukpacketradio.network
+  # Build and run the curl command
+  [ $DEBUG == "true" ] && echo curl "https://nodes.ukpacketradio.network/api/NodeData/$NODENAME" -H 'accept: */*' -H 'Content-Type: application/json' $CURLOPTS -d "$(payload)"
+  curl "https://nodes.ukpacketradio.network/api/NodeData/$NODENAME" -H 'accept: */*' -H 'Content-Type: application/json' $CURLOPTS -d "$(payload)"
+  RESPONSE=$?
+  if [ $RESPONSE -ne 0 ]; then
+    echo Error in upload to nodes.ukpacketradio.network, please run $0 with -d for details
+  else
+    # Save new state file
+    cp /proc/net/nr_neigh /tmp/npr.state
+  fi
+else
+  [ $DEBUG == "true" ] && echo No change in node state
+fi
