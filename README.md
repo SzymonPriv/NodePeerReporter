@@ -15,4 +15,5 @@ at http://nodes.ukpacketradio.network/packet-network-map.html
 - Location of the conf file is hard coded
 - The script uses `/proc/net/nr_neigh` to determine peer nodes
 - The script stores a copy of `nr_neigh` in `/tmp` as a cache when run
-- The script will only make a network call if there has been a change
+- The script will only make a network call if there has been a change or
+  3 hours have passed since the last update
