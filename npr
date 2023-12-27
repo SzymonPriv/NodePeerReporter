@@ -87,7 +87,7 @@ fi
 # Check state file
 diff -q /tmp/npr.state /proc/net/nr_neigh > /dev/null
 DIFF=$?
-if [ $DIFF -ne 0 ] ; then
+if [ $DIFF -ne 0 ] || [ $(find /tmp/npr.state -mmin +180) ] ; then
   # State file is different or does not exist
   echo Peer node changes detected, uploading to nodes.ukpacketradio.network
   # Build and run the curl command
