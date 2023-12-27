@@ -30,7 +30,7 @@ EOF1
 for PORT in `cat /proc/net/ax25 | awk {'print $2'} | sort -n | uniq` ;
   do
     INTNAME=`ifconfig $PORT | grep ax25 | awk {'print $2'}`
-    PORTNAME=`grep $INTNAME /etc/ax25/axports | awk {'print $1'}`
+    PORTNAME=`grep "\s${INTNAME}\s" /etc/ax25/axports | awk {'print $1'}`
     FREQ="FREQ_$PORTNAME"
     MODE="MODE_$PORTNAME"
     BAUD="BAUD_$PORTNAME"
@@ -55,7 +55,7 @@ EOF3
 for PORT in `cat /proc/net/ax25 | awk {'print $2'} | sort -n | uniq` ;
   do
     INTNAME=`ifconfig $PORT | grep ax25 | awk {'print $2'}`
-    PORTNAME=`grep $INTNAME /etc/ax25/axports | awk {'print $1'}`
+    PORTNAME=`grep "\s${INTNAME}\s" /etc/ax25/axports | awk {'print $1'}`
     PORTNODES=`grep $PORT /proc/net/nr_neigh | awk {'print $2'}`
     for PORTNODE in $PORTNODES ;
       do
