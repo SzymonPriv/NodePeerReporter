@@ -9,7 +9,7 @@ at http://nodes.ukpacketradio.network/packet-network-map.html
 2. Make the npr script executable e.g. `chmod 755 /usr/sbin/npr`
 3. Create an `/etc/npr.conf` file based on the example file in this repository
 4. Run `/usr/sbin/npr -d` (debug) to confirm that it works correctly
-5. Add a crontab entry as root `*/20 * * * * /usr/sbin/npr`
+5. Add a crontab entry as root `*/20 * * * * /usr/sbin/npr >> /var/log/npr.log`
 
 ## Notes
 - Location of the conf file is hard coded
