@@ -90,7 +90,7 @@ DIFF=$?
 if [ $DIFF -ne 0 ] || [ $(find /tmp/npr.state -mmin +180) ] ; then
   # State file is different or does not exist
   PAYLOAD=$(payload)
-  echo Peer node changes detected at $(date), uploading payload to nodes.ukpacketradio.network:
+  echo $(date) - Peer node changes detected, uploading payload to nodes.ukpacketradio.network:
   echo $PAYLOAD | jq -c -M .
   # Build and run the curl command
   [ $DEBUG == "true" ] && echo curl "https://nodes.ukpacketradio.network/api/NodeData/$NODENAME" -f -H 'accept: */*' -H 'Content-Type: application/json' $CURLOPTS -d "$PAYLOAD"
