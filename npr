@@ -89,10 +89,12 @@ diff -q /tmp/npr.state /proc/net/nr_neigh > /dev/null
 DIFF=$?
 if [ $DIFF -ne 0 ] || [ $(find /tmp/npr.state -mmin +180) ] ; then
   # State file is different or does not exist
-  echo Peer node changes detected, uploading to nodes.ukpacketradio.network
+  PAYLOAD=$(payload)
+  echo Peer node changes detected at $(date), uploading payload to nodes.ukpacketradio.network:
+  echo $PAYLOAD | jq -c -M .
   # Build and run the curl command
-  [ $DEBUG == "true" ] && echo curl "https://nodes.ukpacketradio.network/api/NodeData/$NODENAME" -f -H 'accept: */*' -H 'Content-Type: application/json' $CURLOPTS -d "$(payload)"
-  curl "https://nodes.ukpacketradio.network/api/NodeData/$NODENAME" -f -H 'accept: */*' -H 'Content-Type: application/json' $CURLOPTS -d "$(payload)"
+  [ $DEBUG == "true" ] && echo curl "https://nodes.ukpacketradio.network/api/NodeData/$NODENAME" -f -H 'accept: */*' -H 'Content-Type: application/json' $CURLOPTS -d "$PAYLOAD"
+  curl "https://nodes.ukpacketradio.network/api/NodeData/$NODENAME" -f -H 'accept: */*' -H 'Content-Type: application/json' $CURLOPTS -d "$PAYLOAD"
   RESPONSE=$?
   if [ $RESPONSE -ne 0 ]; then
     echo Error in upload to nodes.ukpacketradio.network, please run $0 with -d for details
