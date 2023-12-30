@@ -70,9 +70,19 @@ EOF4
 cat << EOF5
   null
   ],
+  "mheard": [
+EOF5
+mheard -n | egrep `date +'%Y-%m-%d'`\|`date --date "Yesterday" +'%Y-%m-%d'` |
+  while read LINE ;
+    do echo $LINE |
+      awk '{print "{\42SSID\42:\42"$1"\42,\42Port\42:\42"$2"\42,\42Packets\42:\42"$3"\42,\42LastHeard\42:\42"$4" "$5"\42},"}' ;
+    done
+cat << EOF6
+  null
+  ],
   "source": "ReportedByNode"
 }
-EOF5
+EOF6
 }
 
 # Check for debug parameter
@@ -87,8 +97,8 @@ fi
 # Check state file
 diff -q /tmp/npr.state /proc/net/nr_neigh > /dev/null
 DIFF=$?
-if [ $DIFF -ne 0 ] || [ $(find /tmp/npr.state -mmin +180) ] ; then
-  # State file is different or does not exist
+if [ $DIFF -ne 0 ] || [ $(find /tmp/npr.state -mmin +59) ] ; then
+  # State file is different or does not exist or an hour has passed
   PAYLOAD=$(payload)
   echo $(date) - Peer node changes detected, uploading payload to nodes.ukpacketradio.network:
   echo $PAYLOAD | jq -c -M .
