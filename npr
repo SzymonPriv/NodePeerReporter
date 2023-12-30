@@ -72,10 +72,10 @@ cat << EOF5
   ],
   "mheard": [
 EOF5
-mheard -n | egrep `date +'%Y-%m-%d'`\|`date --date "Yesterday" +'%Y-%m-%d'` |
+TZ=UTC mheard -n | egrep `date +'%Y-%m-%d'`\|`date --date "Yesterday" +'%Y-%m-%d'` |
   while read LINE ;
     do echo $LINE |
-      awk '{print "{\42SSID\42:\42"$1"\42,\42Port\42:\42"$2"\42,\42Packets\42:\42"$3"\42,\42LastHeard\42:\42"$4" "$5"\42},"}' ;
+      awk '{print "{\42ssid\42:\42"$1"\42,\42port\42:\42"$2"\42,\42packets\42: "$3",\42lastHeard\42:\42"$4" "$5"\42},"}' ;
     done
 cat << EOF6
   null
@@ -99,9 +99,9 @@ diff -q /tmp/npr.state /proc/net/nr_neigh > /dev/null
 DIFF=$?
 if [ $DIFF -ne 0 ] || [ $(find /tmp/npr.state -mmin +59) ] ; then
   # State file is different or does not exist or an hour has passed
-  PAYLOAD=$(payload)
+  PAYLOAD=$(payload | jq -c -M)
   echo $(date) - Peer node changes detected, uploading payload to nodes.ukpacketradio.network:
-  echo $PAYLOAD | jq -c -M .
+  echo $PAYLOAD
   # Build and run the curl command
   [ $DEBUG == "true" ] && echo curl "https://nodes.ukpacketradio.network/api/NodeData/$NODENAME" -f -H 'accept: */*' -H 'Content-Type: application/json' $CURLOPTS -d "$PAYLOAD"
   curl "https://nodes.ukpacketradio.network/api/NodeData/$NODENAME" -f -H 'accept: */*' -H 'Content-Type: application/json' $CURLOPTS -d "$PAYLOAD"
