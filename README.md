@@ -4,6 +4,11 @@ Welcome to the Node Peer Reporter for the Linux Kernel AX.25 and NET/ROM stack.
 This simple script is designed to report your packet node to the M0LTEmap hosted
 at http://nodes.ukpacketradio.network/packet-network-map.html
 
+## Requirements
+1. Bash must be installed in /bin/bash
+2. Curl must be installed and in the path
+3. JQ must be installed and in the path
+
 ## Installation
 1. Copy the main npr script to `/usr/sbin/npr` (as root)
 2. Make the npr script executable e.g. `chmod 755 /usr/sbin/npr`

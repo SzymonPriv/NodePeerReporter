@@ -10,6 +10,9 @@ eval $(sed -r '/[^=]+=[^=]+/!d;s/\s+=\s/=/g' "/etc/npr.conf")
 PORTS=`cat /proc/net/ax25 | awk {'print $2'} | sort -n | uniq`
 SWVER=`uname -r`
 
+command -v curl >/dev/null 2>&1 || { echo >&2 "curl not found, aborting"; exit 1; }
+command -v jq >/dev/null 2>&1 || { echo >&2 "jq not found, aborting"; exit 1; }
+
 # Function to generate the payload
 # (Should probably write this using a proper json parser but this was quick)
 payload() {
