@@ -102,7 +102,7 @@ diff -q /tmp/npr.state /proc/net/nr_neigh > /dev/null
 DIFF=$?
 if [ $DIFF -ne 0 ] || [ $(find /tmp/npr.state -mmin +59) ] ; then
   # State file is different or does not exist or an hour has passed
-  PAYLOAD=$(payload | jq -c -M)
+  PAYLOAD=$(payload | jq -c -M .)
   echo $(date) - Peer node changes detected, uploading payload to nodes.ukpacketradio.network:
   echo $PAYLOAD
   # Build and run the curl command
